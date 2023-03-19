@@ -7,4 +7,8 @@ public interface IServoState
     void SetChannel(byte address, byte value);
 
     byte GetChannel(byte address);
+
+    string GetChannelName(byte address);
+    
+    void ResetChannels();
 }

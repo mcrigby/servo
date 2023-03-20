@@ -7,13 +7,13 @@ public static class GamepadControllerDIExtensions
 {
     public static IServiceCollection AddServoControllers(this IServiceCollection services)
     {
-        services.AddSingleton<ServoControllerFactory>();
+        services.AddHostedService<ServoController>();
 
         return services;
     }
 
     public static IServiceCollection AddServoState(this IServiceCollection services,
-        IDictionary<byte, ServoOutput>? channels)
+        byte chip, string? Name, IDictionary<byte, ServoOutput>? channels)
     {
         services.AddSingleton<ServoState>(provider =>
         {
@@ -21,6 +21,8 @@ public static class GamepadControllerDIExtensions
 
             var result = new ServoState(logger);
 
+            result.Chip = chip;
+            result.Name = Name ?? ServoState.Default_Name;
             result.Channels = channels ?? new Dictionary<byte, ServoOutput>();
 
             return result;
@@ -32,7 +34,7 @@ public static class GamepadControllerDIExtensions
     }
 
     public static IServiceCollection AddServoState(this IServiceCollection services,
-        IDictionary<string, ServoOutput>? channels)
+        byte chip, string? Name, IDictionary<string, ServoOutput>? channels)
     {
         if (channels != null && channels.Keys.Any(x => !byte.TryParse(x, out _)))
             throw new ArgumentException("Keys for Channels must be parsable to byte.");
@@ -43,6 +45,8 @@ public static class GamepadControllerDIExtensions
 
             var result = new ServoState(logger);
 
+            result.Chip = chip;
+            result.Name = Name ?? ServoState.Default_Name;
             result.Channels = channels?
                 .ToDictionary(x => byte.Parse(x.Key), x => x.Value)
                 ?? new Dictionary<byte, ServoOutput>();

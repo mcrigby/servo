@@ -11,7 +11,13 @@ public sealed class ServoState : IServoState, IServoOutputChanged
         Channels = new Dictionary<byte, ServoOutput>();
     }
 
+    public byte Chip { get; set; }
+    
+    public string? Name { get; set; }
+
     public IDictionary<byte, ServoOutput> Channels { get; set; }
+
+    public byte[] AvailableChannels => Channels.Keys.ToArray();
 
     public event EventHandler<ServoOutputEventArgs> Changed = delegate { };
 

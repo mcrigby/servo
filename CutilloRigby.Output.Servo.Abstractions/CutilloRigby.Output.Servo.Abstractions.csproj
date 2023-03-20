@@ -5,11 +5,11 @@
     <AssemblyName>CutilloRigby.Output.Servo.Abstractions</AssemblyName>
     <RootNamespace>CutilloRigby.Output.Servo</RootNamespace>
     <Authors>Martin Cutillo-Rigby</Authors>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <PackageId>CutilloRigby.Output.Servo.Abstractions</PackageId>
     <Product>CutilloRigby.Output.Servo.Abstractions</Product>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Description>Output to Servo Motor Abstractions</Description>
     <OutputType>Library</OutputType>
     <StartupObject />

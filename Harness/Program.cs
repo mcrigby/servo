@@ -9,7 +9,7 @@ namespace Harness;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var host = Host.CreateDefaultBuilder(args)
             .UseConsoleLifetime()
@@ -29,9 +29,9 @@ class Program
                 var servoSettingsSection = hostBuilder.Configuration.GetSection("ServoSettings");
                 var servoSettingsConfiguration = servoSettingsSection.Get<ServoSettingsConfiguration>(options => options.ErrorOnUnknownConfiguration = true);
 
-                services.AddSingleton<IServoMap, ServoMap>();
-                services.AddServoState(servoSettingsConfiguration.Channels);
-                    
+                services.AddSingleton<IServoMap>(ServoMap.SignedServoMap());
+                services.AddServoState(servoSettingsConfiguration.Chip, servoSettingsConfiguration.Name,
+                    servoSettingsConfiguration.Channels);
                 services.AddServoControllers();
 
                 services.AddSingleton<GpioController>();
@@ -42,7 +42,9 @@ class Program
         var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
         lifetime.ApplicationStopping.Register(async () => await host.StopAsync());
 
-        Run(host, lifetime.ApplicationStopping);
+        await host.StartAsync(lifetime.ApplicationStopping);
+        Run(host, lifetime.ApplicationStopped);
+
         Stop(host);
     }
 
@@ -51,12 +53,8 @@ class Program
         if (host == null)
             return;
 
-        var servoControllerFactory = host.Services.GetRequiredService<ServoControllerFactory>();
         var statusLed = host.Services.GetRequiredService<StatusLed>();
         var servoState = host.Services.GetRequiredService<IServoState>();
-
-        var steeringServoController = servoControllerFactory.GetController(1);
-        var driveServoController = servoControllerFactory.GetController(0);
 
         while (!cancellationToken.IsCancellationRequested)
         {

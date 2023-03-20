@@ -20,14 +20,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CutilloRigby.Output.Servo.Abstractions" Version="1.0.0" />
+    <!-- <PackageReference Include="CutilloRigby.Output.Servo.Abstractions" Version="1.0.0" /> -->
     <PackageReference Include="Iot.Device.Bindings" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- <ProjectReference Include="..\CutilloRigby.Output.Servo.Abstractions\CutilloRigby.Output.Servo.Abstractions.csproj" /> -->
+    <ProjectReference Include="..\CutilloRigby.Output.Servo.Abstractions\CutilloRigby.Output.Servo.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

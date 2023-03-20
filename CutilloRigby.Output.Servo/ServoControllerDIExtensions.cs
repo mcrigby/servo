@@ -1,83 +1,66 @@
-using CutilloRigby.Input.Gamepad;
+using CutilloRigby.Output.Servo;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class GamepadControllerDIExtensions
 {
-    public static IServiceCollection AddGamepadController(this IServiceCollection services)
+    public static IServiceCollection AddServoControllers(this IServiceCollection services)
     {
-        services.AddSingleton<GamepadController>();
-        services.AddSingleton<IGamepadAvailable>(provider =>
-            provider.GetRequiredService<GamepadController>()
-        );
-        services.AddHostedService<GamepadController>(provider =>
-            provider.GetRequiredService<GamepadController>()
-        );
+        services.AddSingleton<ServoControllerFactory>();
 
         return services;
     }
 
-    public static IServiceCollection AddGamepadState(this IServiceCollection services,
-        string? name, string? deviceFile, IDictionary<byte, GamepadAxisInput>? axes,
-        IDictionary<byte, GamepadButtonInput>? buttons)
+    public static IServiceCollection AddServoState(this IServiceCollection services,
+        IDictionary<byte, ServoOutput>? channels)
     {
         services.AddSingleton<ServoState>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<ServoState>>();
 
             var result = new ServoState(logger);
-            result.Name = name ?? ServoState.Default_Name;
-            result.DeviceFile = deviceFile ?? ServoState.Default_DeviceFile;
 
-            result.Axes = axes ?? new Dictionary<byte, GamepadAxisInput>();
-            result.Buttons = buttons ?? new Dictionary<byte, GamepadButtonInput>();
+            result.Channels = channels ?? new Dictionary<byte, ServoOutput>();
 
             return result;
         });
 
-        services.AddGamepadStateInterfaces();
+        services.AddServoStateInterfaces();
 
         return services;
     }
 
-    public static IServiceCollection AddGamepadState(this IServiceCollection services,
-        string? name, string? deviceFile, IDictionary<string, GamepadAxisInput>? axes,
-        IDictionary<string, GamepadButtonInput>? buttons)
+    public static IServiceCollection AddServoState(this IServiceCollection services,
+        IDictionary<string, ServoOutput>? channels)
     {
-        if ((axes != null && axes.Keys.Any(x => !byte.TryParse(x, out _)))
-            || (buttons != null && buttons.Keys.Any(x => !byte.TryParse(x, out _))))
-            throw new ArgumentException("Keys for Axes and Buttons must be parsable to byte.");
+        if (channels != null && channels.Keys.Any(x => !byte.TryParse(x, out _)))
+            throw new ArgumentException("Keys for Channels must be parsable to byte.");
 
         services.AddSingleton<ServoState>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<ServoState>>();
 
             var result = new ServoState(logger);
-            result.Name = name ?? ServoState.Default_Name;
-            result.DeviceFile = deviceFile ?? ServoState.Default_DeviceFile;
 
-            result.Axes = axes?
+            result.Channels = channels?
                 .ToDictionary(x => byte.Parse(x.Key), x => x.Value)
-                ?? new Dictionary<byte, GamepadAxisInput>();
-            result.Buttons = buttons?
-                .ToDictionary(x => byte.Parse(x.Key), x => x.Value)
-                ?? new Dictionary<byte, GamepadButtonInput>();
+                ?? new Dictionary<byte, ServoOutput>();
 
             return result;
         });
 
-        services.AddGamepadStateInterfaces();
+        services.AddServoStateInterfaces();
 
         return services;
     }
 
-    private static IServiceCollection AddGamepadStateInterfaces(this IServiceCollection services)
+    private static IServiceCollection AddServoStateInterfaces(this IServiceCollection services)
     {
-        services.AddSingleton<IGamepadState>(provider =>
+        services.AddSingleton<IServoState>(provider =>
             provider.GetRequiredService<ServoState>()
         );
-        services.AddSingleton<IGamepadInputChanged>(provider =>
+        services.AddSingleton<IServoOutputChanged>(provider =>
             provider.GetRequiredService<ServoState>()
         );
 

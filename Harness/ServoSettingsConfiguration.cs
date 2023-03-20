@@ -4,5 +4,5 @@ namespace Harness;
 
 internal sealed class ServoSettingsConfiguration
 {
-    IDictionary<string, ServoOutput>? Channels { get; set; }
+    public IDictionary<string, ServoOutput>? Channels { get; set; }
 }

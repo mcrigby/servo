@@ -1,5 +1,5 @@
 ﻿using System.Device.Gpio;
-using CutilloRigby.Input.Gamepad;
+using CutilloRigby.Output.Servo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +9,7 @@ namespace Harness;
 
 class Program
 {
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
         var host = Host.CreateDefaultBuilder(args)
             .UseConsoleLifetime()
@@ -26,80 +26,80 @@ class Program
             })
             .ConfigureServices((hostBuilder, services) =>
             {
-                var gamepadSettingsSection = hostBuilder.Configuration.GetSection("GamepadSettings");
-                var gamepadSettingsConfiguration = gamepadSettingsSection.Get<GamepadSettingsConfiguration>(options => options.ErrorOnUnknownConfiguration = true);
+                var servoSettingsSection = hostBuilder.Configuration.GetSection("ServoSettings");
+                var servoSettingsConfiguration = servoSettingsSection.Get<ServoSettingsConfiguration>(options => options.ErrorOnUnknownConfiguration = true);
 
-                //services.AddSingleton<IServoSettings>(provider =>
-                //    provider.GetRequiredService<GamepadState>()
-                //);
-
-                services.AddGamepadState(gamepadSettingsConfiguration.Name, gamepadSettingsConfiguration.DeviceFile,
-                    gamepadSettingsConfiguration.Axes, gamepadSettingsConfiguration.Buttons);
+                services.AddSingleton<IServoMap, ServoMap>();
+                services.AddServoState(servoSettingsConfiguration.Channels);
                     
-                services.AddGamepadController();
+                services.AddServoControllers();
 
                 services.AddSingleton<GpioController>();
                 services.AddSingleton<StatusLed>();
-
-                services.AddHostedService<Steering_Servo>();
-                services.AddHostedService<TBLE01_ESC>();
             })
             .Build();
-
 
         var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
         lifetime.ApplicationStopping.Register(async () => await host.StopAsync());
 
-        Start(host);
-
-        await host.StartAsync(lifetime.ApplicationStopping);
-        await host.WaitForShutdownAsync(lifetime.ApplicationStopped);
-
+        Run(host, lifetime.ApplicationStopping);
         Stop(host);
     }
 
-    private static void Start(IHost? host)
+    private static void Run(IHost? host, CancellationToken cancellationToken)
     {
         if (host == null)
             return;
 
-        var gamepadInputChanged = host.Services.GetRequiredService<IGamepadInputChanged>();
-        var gamepadAvailable = host.Services.GetRequiredService<IGamepadAvailable>();
+        var servoControllerFactory = host.Services.GetRequiredService<ServoControllerFactory>();
         var statusLed = host.Services.GetRequiredService<StatusLed>();
+        var servoState = host.Services.GetRequiredService<IServoState>();
 
-        gamepadAvailable.AvailableChanged += (s, e) => statusLed.SetRedLed(!e.Value);
-        statusLed.SetRedLed(!gamepadAvailable.IsAvailable);
+        var steeringServoController = servoControllerFactory.GetController(1);
+        var driveServoController = servoControllerFactory.GetController(0);
 
-        // Configure this if you want to get events when the state of a button changes
-        gamepadInputChanged.ButtonChanged += (object? sender, GamepadButtonInputEventArgs e) =>
+        while (!cancellationToken.IsCancellationRequested)
         {
-            statusLed.SetBlueLed(true);
-        
-            //if (e.Address == 3 && !e.Value && braking == DrivingMode.Braking)
-            //{
-            //    rcCarHat.SetDrive(0);
-            //    await Task.Delay(800);
-            //    braking = DrivingMode.ForwardOnly;
-            //    statusLed.SetGreenLed(false);
-            //    rcCarHat.SetDrive(MuxLTandRT(gamepadSettings.GetAxis(5), gamepadSettings.GetAxis(4)));
-            //}
-            //else if (e.Address == 3 && e.Value)
-            //{
-            //    braking = DrivingMode.Braking;
-            //
-            //    statusLed.SetGreenLed(true);
-            //
-            //    if(MuxLTandRT(gamepadSettings.GetAxis(5), gamepadSettings.GetAxis(4)) > TBLE01_Deadband_Upper)
-            //        rcCarHat.SetDrive(short.MinValue);
-            //    else
-            //        rcCarHat.SetDrive(0);
-            //}
-            //else
-                Console.WriteLine($"Button {e.Name} ({e.Address}) Changed: {e.Value}");
-        
-            statusLed.SetBlueLed(false);
-        };
-        // Configure this if you want to get events when the state of an axis changes
+            var read = Console.ReadKey(true);
+
+            switch (read.Key)
+            {
+                case ConsoleKey.DownArrow: 
+                    servoState.SetChannel(0, DecrementServoValue(servoState.GetChannel(0)));
+                    break;
+                case ConsoleKey.UpArrow: 
+                    servoState.SetChannel(0, IncrementServoValue(servoState.GetChannel(0)));
+                    break;
+                case ConsoleKey.LeftArrow: 
+                    servoState.SetChannel(1, DecrementServoValue(servoState.GetChannel(1)));
+                    break;
+                case ConsoleKey.RightArrow:
+                    servoState.SetChannel(1, IncrementServoValue(servoState.GetChannel(1)));
+                    break;
+                default:
+                    break;
+            };
+        }
+
+        servoState.SetChannel(0, 0);
+        servoState.SetChannel(1, 0);
+    }
+
+    private static byte IncrementServoValue(byte value)
+    {
+        if (value == 127)
+            return value;
+        if (value == 255)
+            return 0;
+        return (byte)(value + 1);
+    }
+    private static byte DecrementServoValue(byte value)
+    {
+        if (value == 128)
+            return value;
+        if (value == 0)
+            return 255;
+        return (byte)(value - 1);
     }
 
     private static void Stop(IHost? host)

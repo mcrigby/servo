@@ -1,5 +1,4 @@
-﻿using System.Device.Gpio;
-using CutilloRigby.Output.Servo;
+﻿using CutilloRigby.Output.Servo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,9 +32,6 @@ class Program
                 services.AddServoState(servoSettingsConfiguration.Chip, servoSettingsConfiguration.Name,
                     servoSettingsConfiguration.Channels);
                 services.AddServoControllers();
-
-                services.AddSingleton<GpioController>();
-                services.AddSingleton<StatusLed>();
             })
             .Build();
 
@@ -44,8 +40,6 @@ class Program
 
         await host.StartAsync(lifetime.ApplicationStopping);
         Run(host, lifetime.ApplicationStopped);
-
-        Stop(host);
     }
 
     private static void Run(IHost? host, CancellationToken cancellationToken)
@@ -53,7 +47,6 @@ class Program
         if (host == null)
             return;
 
-        var statusLed = host.Services.GetRequiredService<StatusLed>();
         var servoState = host.Services.GetRequiredService<IServoState>();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -98,17 +91,5 @@ class Program
         if (value == 0)
             return 255;
         return (byte)(value - 1);
-    }
-
-    private static void Stop(IHost? host)
-    {
-        if (host == null)
-            return;
-
-        var statusLed = host.Services.GetRequiredService<StatusLed>();
-
-        statusLed.SetRedLed(false);
-        statusLed.SetGreenLed(false);
-        statusLed.SetBlueLed(false);
     }
 }

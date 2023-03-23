@@ -1,6 +1,4 @@
-using CutilloRigby.Output.Servo;
-
-namespace Harness;
+namespace CutilloRigby.Output.Servo;
 
 public sealed class ServoMap : IServoMap
 {

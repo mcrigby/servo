@@ -28,7 +28,11 @@ class Program
                 var servoSettingsSection = hostBuilder.Configuration.GetSection("ServoSettings");
                 var servoSettingsConfiguration = servoSettingsSection.Get<ServoSettingsConfiguration>(options => options.ErrorOnUnknownConfiguration = true);
 
-                services.AddSingleton<IServoMap>(ServoMap.SignedServoMap());
+                services.AddServoMap(factory =>
+                {
+                    factory.AddServoMap("Console", ServoMap.SignedServoMap());
+                });
+                
                 services.AddServoState(servoSettingsConfiguration.Chip, servoSettingsConfiguration.Name,
                     servoSettingsConfiguration.Channels);
                 services.AddServoControllers();
@@ -47,7 +51,7 @@ class Program
         if (host == null)
             return;
 
-        var servoState = host.Services.GetRequiredService<IServoState>();
+        var servoState = host.Services.GetRequiredService<IServo>();
 
         while (!cancellationToken.IsCancellationRequested)
         {

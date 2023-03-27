@@ -42,11 +42,14 @@ public sealed class Servo : IServo, IHostedService
 
     public void SetValue(byte value)
     {
-
         if (_value != value)
         {
             setInformation_ValueChanged(_configuration.Name, _value, value);
             _value = value;
+
+            var dutyCycle = _map[_value];
+            _channel.DutyCycle = dutyCycle;
+            setInformation_DutyCycleChanged(_configuration.Name, dutyCycle);
 
             _eventArgs.Value = _value;
             _servoChanged.Trigger(this, _eventArgs);
@@ -74,7 +77,10 @@ public sealed class Servo : IServo, IHostedService
         {
             setInformation_ValueChanged = (name, oldValue, newValue) => 
                 logger.LogInformation("Channel {name} value changed from {oldValue} to {newValue}.", 
-                        name, oldValue, newValue);;
+                        name, oldValue, newValue);
+            setInformation_DutyCycleChanged = (name, dutyCycle) => 
+                logger.LogInformation("Channel {name} duty cycle set to {dutyCycle}.", 
+                        name, dutyCycle);
         }
     }
 
@@ -93,4 +99,5 @@ public sealed class Servo : IServo, IHostedService
     }
 
     private Action<string?, object?, object?> setInformation_ValueChanged = (name, oldValue, newValue) => { };
+    private Action<string?, float?> setInformation_DutyCycleChanged = (name, dutyCycle) => { };
 }

@@ -25,17 +25,25 @@ class Program
             })
             .ConfigureServices((hostBuilder, services) =>
             {
-                var servoSettingsSection = hostBuilder.Configuration.GetSection("ServoSettings");
-                var servoSettingsConfiguration = servoSettingsSection.Get<ServoSettingsConfiguration>(options => options.ErrorOnUnknownConfiguration = true);
+                var servoConfigurationSection = hostBuilder.Configuration.GetSection("Servo");
+                var servoConfigurationDictionary = servoConfigurationSection
+                    .Get<Dictionary<string, ServoConfiguration>>(options => options.ErrorOnUnknownConfiguration = true)
+                    .ToDictionary(x => x.Key, x => (IServoConfiguration)x.Value);
+                var servoMapSection = hostBuilder.Configuration.GetSection("ServoMap");
+                var servoMapDictionary = servoMapSection
+                    .Get<Dictionary<string, float[]>>(options => options.ErrorOnUnknownConfiguration = true)
+                    .ToDictionary(x => x.Key, x => (IServoMap)(ServoMap)x.Value);
 
-                services.AddServoMap(factory =>
+                services.AddServo<Steering_Servo>();
+
+                services.AddServoMap(servoMapDictionary, factory =>
                 {
-                    factory.AddServoMap("Console", ServoMap.SignedServoMap());
+                    factory.AddServoMap("Harness.Steering_Servo", 
+                        //ServoMap.SignedServoMap());
+                        ServoMap.CustomServoMap(rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f));
                 });
-                
-                services.AddServoState(servoSettingsConfiguration.Chip, servoSettingsConfiguration.Name,
-                    servoSettingsConfiguration.Channels);
-                services.AddServoControllers();
+                services.AddServoConfiguration(servoConfigurationDictionary);
+                services.AddServoRequirements();
             })
             .Build();
 
@@ -51,7 +59,7 @@ class Program
         if (host == null)
             return;
 
-        var servoState = host.Services.GetRequiredService<IServo>();
+        var steeringServo = host.Services.GetRequiredService<IServo<Steering_Servo>>();
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -60,24 +68,23 @@ class Program
             switch (read.Key)
             {
                 case ConsoleKey.DownArrow: 
-                    servoState.SetChannel(0, DecrementServoValue(servoState.GetChannel(0)));
+                    //servoState.SetChannel(0, DecrementServoValue(servoState.GetChannel(0)));
                     break;
                 case ConsoleKey.UpArrow: 
-                    servoState.SetChannel(0, IncrementServoValue(servoState.GetChannel(0)));
+                    //servoState.SetChannel(0, IncrementServoValue(servoState.GetChannel(0)));
                     break;
                 case ConsoleKey.LeftArrow: 
-                    servoState.SetChannel(1, DecrementServoValue(servoState.GetChannel(1)));
+                    steeringServo.SetValue(DecrementServoValue(steeringServo.Value));
                     break;
                 case ConsoleKey.RightArrow:
-                    servoState.SetChannel(1, IncrementServoValue(servoState.GetChannel(1)));
+                    steeringServo.SetValue(IncrementServoValue(steeringServo.Value));
                     break;
                 default:
                     break;
             };
         }
 
-        servoState.SetChannel(0, 0);
-        servoState.SetChannel(1, 0);
+        steeringServo.SetValue(0);
     }
 
     private static byte IncrementServoValue(byte value)

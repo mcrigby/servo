@@ -2,7 +2,15 @@ namespace CutilloRigby.Output.Servo;
 
 public sealed class ServoMap : IServoMap
 {
-    private readonly float[] _value;
+    private float[] _value;
+
+    public ServoMap() : this(defaultInitialSize) { }
+
+    public ServoMap(short initialSize)
+    {
+        _value = Array.Empty<float>();
+        Array.Resize<float>(ref _value, initialSize);
+    }
 
     public ServoMap(float[] value)
     {
@@ -17,16 +25,40 @@ public sealed class ServoMap : IServoMap
                 return _value[index];
             return 0;
         }
+        set
+        {
+            if (index >= _value.Length)
+                Array.Resize<float>(ref _value, index + 1);
+            
+            _value[index] = value;
+        }
     }
+
+    public float[] Value
+    {
+        get => _value;
+        set
+        {
+            if (value != null)
+            {
+                _value = value;
+                return;
+            }
+
+            _value = Array.Empty<float>();
+            Array.Resize<float>(ref _value, defaultInitialSize);   
+        }
+    }
+
+    private const short defaultInitialSize = 256;
 
     public static IServoMap LinearServoMap() => CustomServoMap();
     public static IServoMap SignedServoMap() => CustomServoMap(-128);
-    public static IServoMap CustomServoMap(int rangeStart, Func<float, float> dutyCycleCalculation, Func<int, int>? outputOrder = null)
+    public static IServoMap CustomServoMap(int rangeStart, Func<int, float> dutyCycleCalculation, Func<int, int>? outputOrder = null)
     {
 
         var values = Enumerable.Range(rangeStart, 256)
             .OrderBy(x => outputOrder?.Invoke(x) ?? x)
-            .Select(x => (float)x)
             .Select(dutyCycleCalculation)
             .ToArray();
 
@@ -45,4 +77,7 @@ public sealed class ServoMap : IServoMap
 
         return new ServoMap(values);
     }
+
+    public static implicit operator ServoMap(float[] value) => new ServoMap(value);
+    public static implicit operator float[](ServoMap map) => map.Value;
 }

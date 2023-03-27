@@ -1,4 +1,5 @@
 using CutilloRigby.Output.Servo;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -10,12 +11,7 @@ public static class ServoDIExtensions
         services.AddSingleton<IServo<T>>(provider => provider.GetRequiredService<Servo<T>>());
         services.AddHostedService<Servo<T>>(provider => provider.GetRequiredService<Servo<T>>());
 
-        return services;
-    }
-
-    public static IServiceCollection AddServoRequirements(this IServiceCollection services)
-    {
-        services.AddSingleton<IServoChanged, ServoChanged>();
+        services.TryAddSingleton<IServoChanged, ServoChanged>();
 
         return services;
     }
@@ -40,6 +36,9 @@ public static class ServoDIExtensions
 
         services.AddSingleton<IServoMapFactory>(servoMapFactory);
         services.AddSingleton(typeof(IServoMap<>), typeof(ServoMap<>));
+
+        services.AddSingleton<IRemappableServoMapFactory>(servoMapFactory);
+        services.AddSingleton(typeof(IRemappableServoMap<>), typeof(RemappableServoMap<>));
 
         return services;
     }

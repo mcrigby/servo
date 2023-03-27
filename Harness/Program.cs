@@ -35,15 +35,17 @@ class Program
                     .ToDictionary(x => x.Key, x => (IServoMap)(ServoMap)x.Value);
 
                 services.AddServo<Steering_Servo>();
-
+                services.AddServoConfiguration(servoConfigurationDictionary);
                 services.AddServoMap(servoMapDictionary, factory =>
                 {
+                    var steeringServoMap = ServoMap.CustomServoMap(rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f);
+
                     factory.AddServoMap("Harness.Steering_Servo", 
-                        //ServoMap.SignedServoMap());
-                        ServoMap.CustomServoMap(rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f));
+                        new RemappableServoMap(new Dictionary<byte, float[]>{
+                            {0, steeringServoMap},
+                            {1, steeringServoMap.Reverse()}
+                        }));
                 });
-                services.AddServoConfiguration(servoConfigurationDictionary);
-                services.AddServoRequirements();
             })
             .Build();
 
@@ -60,6 +62,8 @@ class Program
             return;
 
         var steeringServo = host.Services.GetRequiredService<IServo<Steering_Servo>>();
+        var steeringServoMap = host.Services.GetRequiredService<IRemappableServoMap<Steering_Servo>>();
+        var mapIndex = (byte)0;
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -67,17 +71,21 @@ class Program
 
             switch (read.Key)
             {
-                case ConsoleKey.DownArrow: 
+                case ConsoleKey.S: 
                     //servoState.SetChannel(0, DecrementServoValue(servoState.GetChannel(0)));
                     break;
-                case ConsoleKey.UpArrow: 
+                case ConsoleKey.W: 
                     //servoState.SetChannel(0, IncrementServoValue(servoState.GetChannel(0)));
                     break;
-                case ConsoleKey.LeftArrow: 
+                case ConsoleKey.A: 
                     steeringServo.SetValue(DecrementServoValue(steeringServo.Value));
                     break;
-                case ConsoleKey.RightArrow:
+                case ConsoleKey.D:
                     steeringServo.SetValue(IncrementServoValue(steeringServo.Value));
+                    break;
+                case ConsoleKey.Y:
+                    mapIndex = (byte)(mapIndex == 0 ? 1 : 0);
+                    steeringServoMap.Remap(mapIndex);
                     break;
                 default:
                     break;

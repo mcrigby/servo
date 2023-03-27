@@ -31,7 +31,7 @@ public sealed class ServoMapFactory : IServoMapFactory, IRemappableServoMapFacto
             && (_source[name] is IRemappableServoMap remappable))
             return remappable;
 
-        return (RemappableServoMap)(float[])ServoMap.LinearServoMap();
+        return RemappableServoMap.Default;
     }
 
     public IServoMap GetServoMap(string name)

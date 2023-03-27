@@ -9,9 +9,13 @@ public sealed class RemappableServoMap<T> : IRemappableServoMap<T>
         _servoMap = servoMapFactory.GetRemappableServoMap(typeof(T).FullName.Replace('+', '.'));
     }
 
-    public float this[byte index] { get => _servoMap[index]; }
+    public string Name => _servoMap.Name;
 
-    public bool AddMap(byte index, float[] values) => _servoMap.AddMap(index, values);
+    public float[] Values => _servoMap.Values;
+
+    public float this[byte index] => _servoMap[index];
+
+    public bool AddMap(byte index, IServoMap map) => _servoMap.AddMap(index, map);
 
     public bool Remap(byte index) => _servoMap.Remap(index);
 }

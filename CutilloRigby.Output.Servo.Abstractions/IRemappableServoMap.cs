@@ -2,6 +2,6 @@ namespace CutilloRigby.Output.Servo;
 
 public interface IRemappableServoMap : IServoMap
 {
-    bool AddMap(byte index, float[] values);
+    bool AddMap(byte index, IServoMap values);
     bool Remap(byte index);
 }

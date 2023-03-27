@@ -38,10 +38,12 @@ class Program
                 services.AddServoConfiguration(servoConfigurationDictionary);
                 services.AddServoMap(servoMapDictionary, factory =>
                 {
-                    var steeringServoMap = ServoMap.CustomServoMap(rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f);
+                    var steeringServoMap = ServoMap.CustomServoMap(
+                        rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
+                        name: "Steering Servo");
 
                     factory.AddServoMap("Harness.Steering_Servo", 
-                        new RemappableServoMap(new Dictionary<byte, float[]>{
+                        new RemappableServoMap(new Dictionary<byte, IServoMap>{
                             {0, steeringServoMap},
                             {1, steeringServoMap.Reverse()}
                         }));
@@ -86,6 +88,7 @@ class Program
                 case ConsoleKey.Y:
                     mapIndex = (byte)(mapIndex == 0 ? 1 : 0);
                     steeringServoMap.Remap(mapIndex);
+                    Console.WriteLine($"Steering Servo Map Change: {steeringServoMap.Name}");
                     break;
                 default:
                     break;

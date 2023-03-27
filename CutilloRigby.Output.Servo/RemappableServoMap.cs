@@ -2,44 +2,49 @@ namespace CutilloRigby.Output.Servo;
 
 public sealed class RemappableServoMap : IRemappableServoMap
 {
-    private readonly IDictionary<byte, float[]> _values;
-    private float[] _activeValues;
+    private readonly IDictionary<byte, IServoMap> _maps;
+    private IServoMap _activeMap;
 
-    public RemappableServoMap(IDictionary<byte, float[]>? values = null)
+    public RemappableServoMap(IDictionary<byte, IServoMap>? maps = null)
     {
-        _values = values ?? new Dictionary<byte, float[]>();
+        _maps = maps ?? new Dictionary<byte, IServoMap>();
         
-        _activeValues = _values.Values.FirstOrDefault();
+        _activeMap = _maps.Values.FirstOrDefault();
     }
 
     public float this[byte index]
     {
         get
         {
-            if (0 <= index && index < _activeValues.Length)
-                return _activeValues[index];
+            if (0 <= index && index < _activeMap.Values.Length)
+                return _activeMap[index];
             return 0;
         }
     }
 
-    public bool AddMap(byte index, float[] values)
+    public string Name => _activeMap.Name;
+
+    public float[] Values => _activeMap.Values;
+
+    public bool AddMap(byte index, IServoMap map)
     {
-        if (_values.ContainsKey(index))
+        if (_maps.ContainsKey(index))
             return false;
 
-        _values.Add(index, values);
+        _maps.Add(index, map);
         return true;
     }
 
     public bool Remap(byte index)
     {
-        if (!_values.ContainsKey(index))
+        if (!_maps.ContainsKey(index))
             return false;
 
-        _activeValues = _values[index];
+        _activeMap = _maps[index];
         return true;
     }
 
-    public static implicit operator RemappableServoMap(float[] value) => new RemappableServoMap(new Dictionary<byte, float[]> { {0, value} } );
-    public static implicit operator float[](RemappableServoMap map) => map._activeValues;
+    public static readonly RemappableServoMap Default = new RemappableServoMap(new Dictionary<byte, IServoMap>{
+        {0, ServoMap.LinearServoMap() }
+    });
 }

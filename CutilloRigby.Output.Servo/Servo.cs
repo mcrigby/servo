@@ -42,22 +42,25 @@ public sealed class Servo : IServo
     public void SetValue(byte value)
     {
         if (_value != value)
-        {
-            setInformation_ValueChanged(_configuration.Name, _value, value);
-            _value = value;
+            OverwriteValue(value);
+    }
 
-            var dutyCycle = _map[_value];
-            _channel.DutyCycle = dutyCycle;
-            setInformation_DutyCycleChanged(_configuration.Name, dutyCycle);
+    public void OverwriteValue(byte value)
+    {
+        setInformation_ValueChanged(_configuration.Name, _value, value);
+        _value = value;
 
-            _eventArgs.Value = _value;
-            _servoChanged.Trigger(this, _eventArgs);
-        }
+        var dutyCycle = _map[_value];
+        _channel.DutyCycle = dutyCycle;
+        setInformation_DutyCycleChanged(_configuration.Name, dutyCycle);
+
+        _eventArgs.Value = _value;
+        _servoChanged.Trigger(this, _eventArgs);
     }
 
     public void Reset()
     {
-        SetValue(_configuration.DefaultValue);
+        OverwriteValue(_configuration.DefaultValue);
     }
 
     public void Start()

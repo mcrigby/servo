@@ -8,6 +8,8 @@ public interface IServo
     
     void SetValue(byte value);
 
+    void OverwriteValue(byte value);
+    
     void Reset();
 
     void Start();

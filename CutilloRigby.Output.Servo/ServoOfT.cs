@@ -17,6 +17,8 @@ public sealed class Servo<T> : IServo<T>
 
     public void SetValue(byte value) => _servo.SetValue(value);
 
+    public void OverwriteValue(byte value) => _servo.OverwriteValue(value);
+    
     public void Reset() => _servo.Reset();
 
     public void Start() => _servo.Start();

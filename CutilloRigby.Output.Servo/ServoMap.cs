@@ -26,31 +26,25 @@ public sealed class ServoMap : IServoMap
     public static ServoMap SignedServoMap(string? name = null) => StandardServoMap(-128, 127, name: name ?? "Signed");
     
     public static ServoMap StandardServoMap(short rangeStart = 0, short rangeEnd = 255,
-        float dutyCycleMin = 0.05f, float dutyCycleMax = 0.10f, string? name = null)
-    {
-        return SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeStart, rangeEnd: rangeEnd,
+        float dutyCycleMin = 0.05f, float dutyCycleMax = 0.10f, string? name = null) =>
+        SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeStart, rangeEnd: rangeEnd,
             lowRangeDutyCycleMin: dutyCycleMin, lowRangeDutyCycleMax: dutyCycleMin,
             highRangeDutyCycleMin: dutyCycleMin, highRangeDutyCycleMax: dutyCycleMax, name: name ?? "Standard");
-    }
+    
     public static ServoMap DualRangeServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
-        float dutyCycleMin = 0.05f, float dutyCycleMid = 0.075f, float dutyCycleMax = 0.10f, string? name = null)
-    {
-        return SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd,
+        float dutyCycleMin = 0.05f, float dutyCycleMid = 0.075f, float dutyCycleMax = 0.10f, string? name = null) =>
+        SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd,
             lowRangeDutyCycleMin: dutyCycleMin, lowRangeDutyCycleMax: dutyCycleMid,
             highRangeDutyCycleMin: dutyCycleMid, highRangeDutyCycleMax: dutyCycleMax,
             name: name ?? "Dual Range");
-    }
+    
     public static ServoMap SplitDualRangeServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
         float lowRangeDutyCycleMin = 0.05f, float lowRangeDutyCycleMax = 0.075f, 
-        float highRangeDutyCycleMin = 0.075f, float highRangeDutyCycleMax = 0.10f, string? name = null)
-    {
-        var offset = 0 - rangeStart;
-
-        return CustomServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd, 
-            lowRangeDutyCycleCalculation: GetDutyCycleCalculation(lowRangeDutyCycleMin, lowRangeDutyCycleMax, offset, rangeMid - rangeStart),
-            highRangeDutyCycleCalculation: GetDutyCycleCalculation(highRangeDutyCycleMin, highRangeDutyCycleMax, offset, (rangeEnd + 1) - rangeMid),
+        float highRangeDutyCycleMin = 0.075f, float highRangeDutyCycleMax = 0.10f, string? name = null) =>
+        CustomServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd, 
+            lowRangeDutyCycleCalculation: GetDutyCycleCalculation(lowRangeDutyCycleMin, lowRangeDutyCycleMax, 0 - rangeStart, rangeMid - rangeStart),
+            highRangeDutyCycleCalculation: GetDutyCycleCalculation(highRangeDutyCycleMin, highRangeDutyCycleMax, 0 - rangeMid, rangeEnd - rangeMid),
             name: name ?? "Split Dual Range");
-    }
 
     public static ServoMap CustomServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
         Func<int, float>? lowRangeDutyCycleCalculation = null, Func<int, float>? highRangeDutyCycleCalculation = null, 
@@ -77,7 +71,7 @@ public sealed class ServoMap : IServoMap
     private static Func<int, float> GetDutyCycleCalculation(float min, float max, int offset, int steps)
     {
         var dutyCycleRange = max - min;
-        var stepFactor = (steps - 1) / dutyCycleRange;
+        var stepFactor = steps / dutyCycleRange;
 
         return x => ((x + offset) / stepFactor) + min;
     }

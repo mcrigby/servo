@@ -43,7 +43,7 @@ class Program
                         dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
                         name: "Steering Servo");
 
-                    factory.AddServoMap("Harness.Steering_Servo", 
+                    factory.AddServoMap<Steering_Servo>(
                         new RemappableServoMap(new Dictionary<byte, IServoMap>{
                             {0, steeringServoMap},
                             {1, steeringServoMap.Reverse()}

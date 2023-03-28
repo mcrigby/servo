@@ -39,7 +39,7 @@ class Program
                 services.AddServoMap(servoMapDictionary, factory =>
                 {
                     var steeringServoMap = ServoMap.StandardServoMap(
-                        rangeStart: -128, rangeEnd: 127, 
+                        rangeMin: -128, rangeMax: 127, 
                         dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
                         name: "Steering Servo");
 

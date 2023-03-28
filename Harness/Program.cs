@@ -38,8 +38,9 @@ class Program
                 services.AddServoConfiguration(servoConfigurationDictionary);
                 services.AddServoMap(servoMapDictionary, factory =>
                 {
-                    var steeringServoMap = ServoMap.CustomServoMap(
-                        rangeStart: -128, dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
+                    var steeringServoMap = ServoMap.StandardServoMap(
+                        rangeStart: -128, rangeEnd: 127, 
+                        dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
                         name: "Steering Servo");
 
                     factory.AddServoMap("Harness.Steering_Servo", 

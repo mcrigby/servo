@@ -22,30 +22,64 @@ public sealed class ServoMap : IServoMap
         }
     }
 
-    public static ServoMap LinearServoMap(string? name = null) => CustomServoMap(name: name ?? "Linear");
-    public static ServoMap SignedServoMap(string? name = null) => CustomServoMap(-128, name: name ?? "Signed");
-    public static ServoMap CustomServoMap(int rangeStart, Func<int, float> dutyCycleCalculation, Func<int, int>? outputOrder = null, string? name = null)
+    public static ServoMap LinearServoMap(string? name = null) => StandardServoMap(name: name ?? "Linear");
+    public static ServoMap SignedServoMap(string? name = null) => StandardServoMap(-128, 127, name: name ?? "Signed");
+    
+    public static ServoMap StandardServoMap(short rangeStart = 0, short rangeEnd = 255,
+        float dutyCycleMin = 0.05f, float dutyCycleMax = 0.10f, string? name = null)
     {
+        return SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeStart, rangeEnd: rangeEnd,
+            lowRangeDutyCycleMin: dutyCycleMin, lowRangeDutyCycleMax: dutyCycleMin,
+            highRangeDutyCycleMin: dutyCycleMin, highRangeDutyCycleMax: dutyCycleMax, name: name ?? "Standard");
+    }
+    public static ServoMap DualRangeServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
+        float dutyCycleMin = 0.05f, float dutyCycleMid = 0.075f, float dutyCycleMax = 0.10f, string? name = null)
+    {
+        return SplitDualRangeServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd,
+            lowRangeDutyCycleMin: dutyCycleMin, lowRangeDutyCycleMax: dutyCycleMid,
+            highRangeDutyCycleMin: dutyCycleMid, highRangeDutyCycleMax: dutyCycleMax,
+            name: name ?? "Dual Range");
+    }
+    public static ServoMap SplitDualRangeServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
+        float lowRangeDutyCycleMin = 0.05f, float lowRangeDutyCycleMax = 0.075f, 
+        float highRangeDutyCycleMin = 0.075f, float highRangeDutyCycleMax = 0.10f, string? name = null)
+    {
+        var offset = 0 - rangeStart;
 
-        var values = Enumerable.Range(rangeStart, 256)
-            .OrderBy(x => outputOrder?.Invoke(x) ?? x)
-            .Select(dutyCycleCalculation)
+        return CustomServoMap(rangeStart: rangeStart, rangeMid: rangeMid, rangeEnd: rangeEnd, 
+            lowRangeDutyCycleCalculation: GetDutyCycleCalculation(lowRangeDutyCycleMin, lowRangeDutyCycleMax, offset, rangeMid - rangeStart),
+            highRangeDutyCycleCalculation: GetDutyCycleCalculation(highRangeDutyCycleMin, highRangeDutyCycleMax, offset, (rangeEnd + 1) - rangeMid),
+            name: name ?? "Split Dual Range");
+    }
+
+    public static ServoMap CustomServoMap(short rangeStart = 0, short rangeMid = 128, short rangeEnd = 255,
+        Func<int, float>? lowRangeDutyCycleCalculation = null, Func<int, float>? highRangeDutyCycleCalculation = null, 
+        Func<int, int>? outputOrder = null, string? name = null)
+    {
+        if (!(rangeStart <= rangeMid && rangeMid <= rangeEnd))
+            throw new ArgumentException("Invalid Range. rangeStart <= rangeMid <= rangeEnd");
+        
+        var rangeOffset = 0 - rangeStart;
+        var rangeLength = (rangeEnd + 1) - rangeStart;
+
+        var values = Enumerable.Range(rangeStart, rangeLength)
+            .OrderBy(x => outputOrder?.Invoke(x) ?? (x < 0 ? rangeLength + x : x))
+            .Select(x => 
+                (x >= rangeMid 
+                    ? highRangeDutyCycleCalculation?.Invoke(x) 
+                    : lowRangeDutyCycleCalculation?.Invoke(x)) 
+                ?? 0f)
             .ToArray();
 
         return new ServoMap(values, name ?? "Calulated Custom");
     }
-    public static ServoMap CustomServoMap(short rangeStart = 0, short rangeLength = 256, float dutyCycleMin = 0.05f, float dutyCycleMax = 0.10f, string? name = null)
+
+    private static Func<int, float> GetDutyCycleCalculation(float min, float max, int offset, int steps)
     {
-        var rangeOffset = 0 - rangeStart;
-        var dutyCycleRange = dutyCycleMax - dutyCycleMin;
-        var stepFactor = (rangeLength - 1) / dutyCycleRange;
+        var dutyCycleRange = max - min;
+        var stepFactor = (steps - 1) / dutyCycleRange;
 
-        var values = Enumerable.Range(rangeStart, rangeLength)
-            .OrderBy(x => x < 0 ? rangeLength + x : x)
-            .Select(x => ((x + rangeOffset) / stepFactor) + dutyCycleMin)
-            .ToArray();
-
-        return new ServoMap(values, name ?? "Standard Custom");
+        return x => ((x + offset) / stepFactor) + min;
     }
 
     public static implicit operator ServoMap(float[] value) => new ServoMap(value, "Implicit Conversion");

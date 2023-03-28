@@ -6,7 +6,7 @@ public sealed class RemappableServoMap<T> : IRemappableServoMap<T>
 
     public RemappableServoMap(IRemappableServoMapFactory servoMapFactory)
     {
-        _servoMap = servoMapFactory.GetRemappableServoMap(typeof(T).FullName.Replace('+', '.'));
+        _servoMap = servoMapFactory.GetRemappableServoMap(typeof(T).FactoryName());
     }
 
     public string Name => _servoMap.Name;

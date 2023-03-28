@@ -6,7 +6,7 @@ public sealed class ServoMap<T> : IServoMap<T>
 
     public ServoMap(IServoMapFactory servoMapFactory)
     {
-        _servoMap = servoMapFactory.GetServoMap(typeof(T).FullName.Replace('+', '.'));
+        _servoMap = servoMapFactory.GetServoMap(typeof(T).FactoryName());
     }
 
     public string Name => _servoMap.Name;

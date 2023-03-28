@@ -17,6 +17,11 @@ public sealed class ServoConfigurationFactory : IServoConfigurationFactory
             _source[name] = configuration;
     }
 
+    public void AddServoConfiguration<T>(IServoConfiguration configuration)
+    {
+        AddServoConfiguration(typeof(T).FactoryName(), configuration);
+    }
+
     public IServoConfiguration GetServoConfiguration(string name)
     {
         if (!_source.ContainsKey(name))

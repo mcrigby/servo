@@ -6,7 +6,7 @@ public sealed class ServoConfiguration<T> : IServoConfiguration<T>
 
     public ServoConfiguration(IServoConfigurationFactory servoConfigurationFactory)
     {
-        _servoConfiguration = servoConfigurationFactory.GetServoConfiguration(typeof(T).FullName.Replace('+', '.'));
+        _servoConfiguration = servoConfigurationFactory.GetServoConfiguration(typeof(T).FactoryName());
     }
 
     public byte Chip { get => _servoConfiguration.Chip; set => _servoConfiguration.Chip = value; }

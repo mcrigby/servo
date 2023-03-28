@@ -7,10 +7,7 @@ public static class ServoDIExtensions
 {
     public static IServiceCollection AddServo<T>(this IServiceCollection services)
     {
-        services.AddSingleton<Servo<T>>();
-        services.AddSingleton<IServo<T>>(provider => provider.GetRequiredService<Servo<T>>());
-        services.AddHostedService<Servo<T>>(provider => provider.GetRequiredService<Servo<T>>());
-
+        services.AddSingleton<IServo<T>, Servo<T>>();
         services.TryAddSingleton<IServoChanged, ServoChanged>();
 
         return services;

@@ -17,12 +17,22 @@ public sealed class ServoMapFactory : IServoMapFactory, IRemappableServoMapFacto
             _source[name] = map;
     }
 
+    public void AddRemappableServoMap<T>(IRemappableServoMap map)
+    {
+        AddRemappableServoMap(typeof(T).FactoryName(), map);
+    }
+
     public void AddServoMap(string name, IServoMap map)
     {
         if (!_source.ContainsKey(name))
             _source.Add(name, map);
         else
             _source[name] = map;
+    }
+
+    public void AddServoMap<T>(IServoMap map)
+    {
+        AddServoMap(typeof(T).FactoryName(), map);
     }
 
     public IRemappableServoMap GetRemappableServoMap(string name)

@@ -2,7 +2,7 @@ namespace CutilloRigby.Output.Servo;
 
 public interface IServo
 {
-    string? Name { get; }
+    string Name { get; }
 
     byte Value { get; }
     

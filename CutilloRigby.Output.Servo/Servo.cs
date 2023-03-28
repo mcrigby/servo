@@ -1,10 +1,9 @@
 using System.Device.Pwm;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace CutilloRigby.Output.Servo;
 
-public sealed class Servo : IServo, IHostedService
+public sealed class Servo : IServo
 {
     private readonly IServoConfiguration _configuration;
     private readonly IServoMap _map;
@@ -36,9 +35,9 @@ public sealed class Servo : IServo, IHostedService
         _servoChanged.Trigger(this, _eventArgs);
     }
 
-    public string? Name { get => _configuration.Name; }
+    public string Name => _configuration.Name ?? "Unnamed";
 
-    public byte Value { get => _value; }
+    public byte Value => _value;
 
     public void SetValue(byte value)
     {
@@ -82,20 +81,6 @@ public sealed class Servo : IServo, IHostedService
                 logger.LogInformation("Channel {name} duty cycle set to {dutyCycle}.", 
                         name, dutyCycle);
         }
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        Start();
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        Stop();
-
-        return Task.CompletedTask;
     }
 
     private Action<string?, object?, object?> setInformation_ValueChanged = (name, oldValue, newValue) => { };

@@ -1,12 +1,12 @@
-namespace CutilloRigby.Output.Servo;
+namespace CutilloRigby.Output.Servo.Remappable;
 
 public sealed class RemappableServoMap<T> : IRemappableServoMap<T>
 {
     private readonly IRemappableServoMap _servoMap;
 
-    public RemappableServoMap(IRemappableServoMapFactory servoMapFactory)
+    public RemappableServoMap(IServoMapFactory servoMapFactory)
     {
-        _servoMap = servoMapFactory.GetRemappableServoMap(typeof(T).FactoryName());
+        _servoMap = servoMapFactory.GetRemappableServoMap<T>();
     }
 
     public string Name => _servoMap.Name;

@@ -1,4 +1,4 @@
-namespace CutilloRigby.Output.Servo;
+namespace CutilloRigby.Output.Servo.Remappable;
 
 public interface IRemappableServoMap : IServoMap
 {

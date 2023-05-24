@@ -1,4 +1,4 @@
-namespace CutilloRigby.Output.Servo;
+namespace CutilloRigby.Output.Servo.Remappable;
 
 public sealed class RemappableServoMap : IRemappableServoMap
 {
@@ -45,6 +45,6 @@ public sealed class RemappableServoMap : IRemappableServoMap
     }
 
     public static readonly RemappableServoMap Default = new RemappableServoMap(new Dictionary<byte, IServoMap>{
-        {0, ServoMap.LinearServoMap() }
+        {0, EmptyServoMap.Instance }
     });
 }

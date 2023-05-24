@@ -1,4 +1,5 @@
 ﻿using CutilloRigby.Output.Servo;
+using CutilloRigby.Output.Servo.Remappable;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -43,12 +44,12 @@ class Program
                         dutyCycleMin: 0.056f, dutyCycleMax: 0.094f,
                         name: "Steering Servo");
 
-                    factory.AddServoMap<Steering_Servo>(
+                    factory.AddRemappableServoMap<Steering_Servo>(
                         new RemappableServoMap(new Dictionary<byte, IServoMap>{
                             {0, steeringServoMap},
                             {1, steeringServoMap.Reverse()}
                         }));
-                });
+                }).AddRemappableServoMap();
             })
             .Build();
 

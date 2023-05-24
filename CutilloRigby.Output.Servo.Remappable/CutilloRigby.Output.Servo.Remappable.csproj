@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>CutilloRigby.Output.Servo</AssemblyName>
-    <RootNamespace>CutilloRigby.Output.Servo</RootNamespace>
+    <AssemblyName>CutilloRigby.Output.Servo.Remappable</AssemblyName>
+    <RootNamespace>CutilloRigby.Output.Servo.Remappable</RootNamespace>
     <Authors>Martin Cutillo-Rigby</Authors>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
-    <PackageId>CutilloRigby.Output.Servo</PackageId>
-    <Product>CutilloRigby.Output.Servo</Product>
-    <Version>1.0.8</Version>
-    <Description>Output to Servo Motor</Description>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageId>CutilloRigby.Output.Servo.Remappable</PackageId>
+    <Product>CutilloRigby.Output.Servo.Remappable</Product>
+    <Version>1.0.0</Version>
+    <Description>Remappable Servo Maps</Description>
     <OutputType>Library</OutputType>
     <StartupObject />
     <IsPackable>true</IsPackable>
@@ -20,13 +20,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Iot.Device.Bindings" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CutilloRigby.Output.Servo.Abstractions\CutilloRigby.Output.Servo.Abstractions.csproj" />
+    <ProjectReference Include="..\CutilloRigby.Output.Servo.Remappable.Abstractions\CutilloRigby.Output.Servo.Remappable.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

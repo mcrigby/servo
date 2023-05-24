@@ -28,14 +28,13 @@ public static class ServoDIExtensions
     public static IServiceCollection AddServoMap(this IServiceCollection services, 
         IDictionary<string, IServoMap>? source = null, Action<IServoMapFactory>? configure = null)
     {
-        var servoMapFactory = new ServoMapFactory(source ?? new Dictionary<string, IServoMap>());
-        configure?.Invoke(servoMapFactory);
+        services.AddSingleton<IServoMapFactory>(provider => {
+            var servoMapFactory = new ServoMapFactory(source ?? new Dictionary<string, IServoMap>());
+            configure?.Invoke(servoMapFactory);
 
-        services.AddSingleton<IServoMapFactory>(servoMapFactory);
+            return servoMapFactory;
+        });
         services.AddSingleton(typeof(IServoMap<>), typeof(ServoMap<>));
-
-        services.AddSingleton<IRemappableServoMapFactory>(servoMapFactory);
-        services.AddSingleton(typeof(IRemappableServoMap<>), typeof(RemappableServoMap<>));
 
         return services;
     }

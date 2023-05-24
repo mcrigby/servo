@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CutilloRigby.Output.Servo\CutilloRigby.Output.Servo.csproj" />
+    <ProjectReference Include="..\CutilloRigby.Output.Servo.Remappable\CutilloRigby.Output.Servo.Remappable.csproj" />
   </ItemGroup>
 
   <ItemGroup>

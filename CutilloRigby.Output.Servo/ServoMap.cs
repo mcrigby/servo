@@ -82,6 +82,6 @@ public sealed class ServoMap : IServoMap
         return x => ((x + offset) / stepFactor) + min;
     }
 
-    public static implicit operator ServoMap(float[] value) => new ServoMap(value, "Implicit Conversion");
+    public static implicit operator ServoMap(float[] value) => new ServoMap(value, "Converted from Values");
     public static implicit operator float[](ServoMap map) => map.Values;
 }

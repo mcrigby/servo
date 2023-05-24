@@ -29,4 +29,9 @@ public sealed class ServoConfigurationFactory : IServoConfigurationFactory
         else
             return _source[name];
     }
+
+    public IServoConfiguration GetServoConfiguration<T>()
+    {
+        return GetServoConfiguration(typeof(T).FactoryName());
+    }
 }
